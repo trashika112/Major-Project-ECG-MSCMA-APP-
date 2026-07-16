@@ -2,16 +2,16 @@
 
 An AI-powered ECG classification app built around **MSCMA-Net** (Multi-Scale Convolutional + Multi-head Attention Network). It classifies 12-lead ECG signals into 5 diagnostic categories, generates explainability heatmaps, and produces downloadable clinical PDF reports — wrapped in a full-stack web app with role-based logins (admin, doctor, cardiologist, nurse).
 
-> ⚠️ **Disclaimer:** This is a decision-support demo, not a certified medical device. All predictions must be reviewed and confirmed by a qualified clinician before any care decision.
+>  **Disclaimer:** This is a decision-support demo, not a certified medical device. All predictions must be reviewed and confirmed by a qualified clinician before any care decision.
 
 # Features
 
-- 🫀 12-lead ECG classification into **NORM, MI, STTC, CD, HYP**
-- 🔥 Grad×Input saliency heatmaps showing which leads/regions drove a prediction
-- 📄 Auto-generated PDF clinical reports per ECG record
-- 👥 Role-based auth (JWT) — admin / doctor / cardiologist / nurse
-- 📊 Patient dashboard with ECG upload history
-- 📥 Accepts `.csv`, `.npy`, and `.wfdb` (`.dat` + `.hea`) ECG formats at any sampling rate
+-  12-lead ECG classification into **NORM, MI, STTC, CD, HYP**
+-  Grad×Input saliency heatmaps showing which leads/regions drove a prediction
+-  Auto-generated PDF clinical reports per ECG record
+-  Role-based auth (JWT) — admin / doctor / cardiologist / nurse
+-  Patient dashboard with ECG upload history
+-  Accepts `.csv`, `.npy`, and `.wfdb` (`.dat` + `.hea`) ECG formats at any sampling rate
 
 ## Tech Stack
 
@@ -154,7 +154,7 @@ App runs at http://localhost:5173 and talks to the backend at `http://localhost:
 | cardio   | cardio123  | cardiologist |
 | nurse    | nurse123   | nurse        |
 
-⚠️ Change or remove these before deploying anywhere real.
+ Change or remove these before deploying anywhere real.
 
 ## Configuration
 
