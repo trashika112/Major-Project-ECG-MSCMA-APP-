@@ -1,93 +1,129 @@
-<<<<<<< HEAD
-# ECG Clinical Decision Support System — MSCMA-Net
+# ECG-MSCMA-Net — Clinical Decision Support System
 
-A full-stack demo app around your trained MSCMA-Net checkpoint: FastAPI
-backend + React frontend, matching the workflow you sketched:
+An AI-powered ECG classification app built around **MSCMA-Net** (Multi-Scale Convolutional + Multi-head Attention Network). It classifies 12-lead ECG signals into 5 diagnostic categories, generates explainability heatmaps, and produces downloadable clinical PDF reports — wrapped in a full-stack web app with role-based logins (admin, doctor, cardiologist, nurse).
 
-```
-Doctor Login → Dashboard → Register/Select Patient → Upload ECG →
-Preprocessing → MSCMA-Net Prediction → Results + Confidence + Heatmap →
-Save to Database → Generate PDF Report → Retrieve by Patient ID
-```
+> ⚠️ **Disclaimer:** This is a decision-support demo, not a certified medical device. All predictions must be reviewed and confirmed by a qualified clinician before any care decision.
 
-## Project layout
+## Features
+
+- 🫀 12-lead ECG classification into **NORM, MI, STTC, CD, HYP**
+- 🔥 Grad×Input saliency heatmaps showing which leads/regions drove a prediction
+- 📄 Auto-generated PDF clinical reports per ECG record
+- 👥 Role-based auth (JWT) — admin / doctor / cardiologist / nurse
+- 📊 Patient dashboard with ECG upload history
+- 📥 Accepts `.csv`, `.npy`, and `.wfdb` (`.dat` + `.hea`) ECG formats at any sampling rate
+
+## Tech Stack
+
+**Backend:** FastAPI, PyTorch, SQLAlchemy (SQLite by default), JWT auth (bcrypt-hashed passwords)
+**Frontend:** React 18 + Vite, Tailwind CSS, Plotly.js (signal/saliency charts), React Router, Axios
+
+## Project Structure
 
 ```
 ecg-mscma-app/
-├── backend/            FastAPI app, model, DB, PDF report generation
-│   ├── app.py
-│   ├── model.py         MSCMA-Net architecture (must match your training code)
-│   ├── predict.py       loads checkpoint once, runs inference + saliency
-│   ├── preprocessing.py CSV / NPY / WFDB loaders + normalization
-│   ├── reports.py       PDF report builder
-│   ├── routers/         auth, patients, ecg upload/predict
-│   ├── weights/         <- put your best_model.pth here
-│   └── README.md        full backend setup instructions
-└── frontend/            React + Vite + Tailwind + Plotly
-    ├── src/pages/        Login, Dashboard, Patients, PatientDetail
-    ├── src/components/   AppShell, ECGChart, RiskBadge, ProcessingOverlay…
-    └── README.md         full frontend setup instructions
+├── backend/
+│   ├── app.py              # FastAPI entrypoint
+│   ├── model.py             # MSCMA-Net architecture
+│   ├── predict.py           # Inference + saliency service
+│   ├── preprocessing.py     # Signal loading/resampling (csv/npy/wfdb)
+│   ├── reports.py           # PDF report generation
+│   ├── routers/              # auth / patients / ecg / admin endpoints
+│   ├── weights/              # trained checkpoint goes here (not committed)
+│   └── requirements.txt
+└── frontend/
+    ├── src/
+    ├── package.json
+    └── vite.config.js
 ```
 
-## Quickest path to a working demo
+## Getting Started
+
+### Prerequisites
+- Python 3.10+ (tested on 3.13)
+- Node.js 18+
+- A trained MSCMA-Net checkpoint (see `backend/README.md` for the exact format)
+
+### 1. Backend setup
 
 ```bash
-# 1) backend
 cd backend
-python -m venv venv && source venv/bin/activate
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env                      # edit SECRET_KEY etc.
-cp /path/to/your/best_model.pth weights/   # your trained MSCMA-Net checkpoint
-python seed.py                            # creates DB + demo logins
-uvicorn app:app --reload --port 8000
+```
 
-# 2) frontend (new terminal)
-cd ../frontend
+Add your trained checkpoint to `backend/weights/best_model.pth` (see `backend/README.md` for the required checkpoint format — `model_state`, `lead_mean`, `lead_std`, optional `thresholds`).
+
+```bash
+cp .env.example .env
+# edit .env: set SECRET_KEY to a long random string
+```
+
+Create the database and demo accounts:
+
+```bash
+python seed.py
+```
+
+Run the API:
+
+```bash
+uvicorn app:app --reload --port 8000
+```
+
+- API docs: http://localhost:8000/docs
+- Health check: http://localhost:8000/health
+
+### 2. Frontend setup
+
+```bash
+cd frontend
 npm install
 npm run dev
 ```
 
-Then open http://localhost:5173, log in with `doctor` / `doctor123`, register
-a patient, and upload a CSV/NPY/WFDB ECG file to see a live prediction.
+App runs at http://localhost:5173 and talks to the backend at `http://localhost:8000`.
 
-## What's implemented vs. simplified (read before your demo/viva)
+### Demo logins
 
-**Implemented end-to-end:**
-- Role-based login (JWT + bcrypt), 4 demo roles
-- Dashboard stats (today's patients / predictions / high-risk / normal)
-- Patient registration + search + per-patient history
-- ECG upload (CSV, NPY, WFDB) → preprocessing → MSCMA-Net inference
-- Prediction screen: per-class probabilities, confidence, risk level,
-  detected classes, ECG viewer with a saliency (Grad×Input) overlay per lead
-- PDF report generation and download, with hospital name, patient details,
-  prediction table, interpretation, disclaimer
-- History of previous visits per patient
+| Username | Password   | Role         |
+|----------|------------|--------------|
+| admin    | admin123   | admin        |
+| doctor   | doctor123  | doctor       |
+| cardio   | cardio123  | cardiologist |
+| nurse    | nurse123   | nurse        |
 
-**Deliberately simplified (call these out if asked in a review):**
-- The "heatmap" is a Grad×Input saliency map computed at request time, not
-  the model's internal attention weights and not a validated clinical
-  localization — the UI already says this explicitly, keep that wording.
-- No admin panel UI yet (the API supports creating users via
-  `POST /auth/users` as an admin, but there's no screen for it — easy to add
-  as `frontend/src/pages/Admin.jsx` following the `Patients.jsx` pattern).
-- SQLite + local file storage — fine for a project demo, swap for
-  Postgres + S3-style storage before anything resembling production.
-- Auth is JWT + bcrypt but has no rate limiting, refresh tokens, or audit
-  trail — call this out as "future work" rather than presenting it as
-  production-grade security.
+⚠️ Change or remove these before deploying anywhere real.
 
-## If your checkpoint differs from what's expected
+## Configuration
 
-`backend/model.py` is copied *exactly* from your training notebook. If you
-changed the architecture since training, this will fail to load with a
-`state_dict` key-mismatch error — copy the current `MultiScaleCNNMambaAttnNet`
-(and any blocks it depends on) from your latest notebook into `model.py`
-before running.
+Key variables in `backend/.env` (copy from `.env.example`):
 
-If your checkpoint doesn't include `lead_mean`/`lead_std`/`thresholds`
-(the notebook's `CKPT_PATH` save does include them), predictions will run but
-use un-normalized inputs and a flat 0.5 threshold — add those keys to your
-`torch.save(...)` call, or hardcode them in `predict.py`.
-=======
-# Major-Project-ECG-MSCMA-APP-
->>>>>>> 11dad9c35eac3ed457e6184691ae4ac57a0945d8
+| Variable | Description |
+|---|---|
+| `SECRET_KEY` | JWT signing secret — set to a long random string |
+| `DATABASE_URL` | Defaults to local SQLite; swap for Postgres in production |
+| `MODEL_CHECKPOINT` | Path to the `.pth` checkpoint served for inference |
+| `N_LEADS` / `SEQ_LEN` | Must match your training run (default 12 leads, 1000 samples) |
+| `CLASSES` | Comma-separated class labels (default `NORM,MI,STTC,CD,HYP`) |
+
+## Notes Before Production Use
+
+- No rate limiting, refresh tokens, or audit logging yet — add these before handling real patient health information.
+- SQLite is fine for a demo; use Postgres for multi-user/production deployments.
+- The saliency heatmap is a Grad×Input map computed at request time, not the model's internal attention weights — the UI already discloses this.
+- Passwords are bcrypt-hashed; `requirements.txt` deliberately pins `bcrypt==4.0.1` for compatibility with `passlib`.
+
+## Contributing
+
+1. Fork or clone the repo
+2. Create a feature branch: `git checkout -b feature/your-change`
+3. Commit your changes and push: `git push -u origin feature/your-change`
+4. Open a Pull Request
+
+Please don't commit `.env`, database files (`*.db`), model weights, or `node_modules` — these are excluded via `.gitignore`.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
