@@ -186,4 +186,4 @@ Please don't commit `.env`, database files (`*.db`), model weights, or `node_mod
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
+This project is licensed under the [MIT License](LICENSE).
