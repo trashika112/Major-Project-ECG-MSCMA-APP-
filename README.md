@@ -4,7 +4,7 @@ An AI-powered ECG classification app built around **MSCMA-Net** (Multi-Scale Con
 
 > ⚠️ **Disclaimer:** This is a decision-support demo, not a certified medical device. All predictions must be reviewed and confirmed by a qualified clinician before any care decision.
 
-## Features
+# Features
 
 - 🫀 12-lead ECG classification into **NORM, MI, STTC, CD, HYP**
 - 🔥 Grad×Input saliency heatmaps showing which leads/regions drove a prediction
