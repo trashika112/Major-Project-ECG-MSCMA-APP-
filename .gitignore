@@ -1,0 +1,14 @@
+.env
+backend/.env
+__pycache__/
+*.pyc
+venv/
+env/
+*.db
+backend/reports_out/*
+!backend/reports_out/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+.DS_Store
+.vscode/
+node_modules/
