@@ -22,20 +22,83 @@ An AI-powered ECG classification app built around **MSCMA-Net** (Multi-Scale Con
 
 ```
 ecg-mscma-app/
+├── README.md
+├── CHANGES.md
+├── QUICKSTART.md
+├── LICENSE
+├── .gitignore
+│
 ├── backend/
-│   ├── app.py              # FastAPI entrypoint
-│   ├── model.py             # MSCMA-Net architecture
-│   ├── predict.py           # Inference + saliency service
-│   ├── preprocessing.py     # Signal loading/resampling (csv/npy/wfdb)
-│   ├── reports.py           # PDF report generation
-│   ├── routers/              # auth / patients / ecg / admin endpoints
-│   ├── weights/              # trained checkpoint goes here (not committed)
-│   └── requirements.txt
+│   ├── app.py                   # FastAPI entrypoint
+│   ├── auth.py                  # JWT auth logic
+│   ├── config.py                # Env config, classes, disclaimer text
+│   ├── database.py               # DB session/engine setup
+│   ├── models_db.py              # SQLAlchemy ORM models
+│   ├── schemas.py                # Pydantic request/response schemas
+│   ├── model.py                  # MSCMA-Net architecture
+│   ├── predict.py                # Inference + saliency service
+│   ├── preprocessing.py          # Signal loading/resampling (csv/npy/wfdb)
+│   ├── reports.py                # PDF report generation
+│   ├── seed.py                   # Creates DB + demo accounts
+│   ├── check_checkpoint.py       # Utility to inspect a saved checkpoint
+│   ├── requirements.txt
+│   ├── README.md                 # Backend-specific setup docs
+│   │
+│   ├── routers/
+│   │   ├── auth_router.py        # Login/token endpoints
+│   │   ├── patients_router.py    # Patient CRUD + dashboard stats
+│   │   ├── ecg_router.py         # ECG upload/predict/history/report
+│   │   └── admin_router.py       # Admin-only user management
+│   │
+│   ├── weights/                  # Trained checkpoint goes here (gitignored)
+│   ├── database/                 # SQLite file lives here (gitignored)
+│   ├── uploads/                  # Uploaded ECG files (gitignored)
+│   └── reports_out/              # Generated PDF/heatmap outputs (gitignored)
+│
 └── frontend/
-    ├── src/
     ├── package.json
-    └── vite.config.js
+    ├── package-lock.json
+    ├── vite.config.js
+    ├── tailwind.config.js
+    ├── postcss.config.js
+    ├── index.html
+    ├── README.md
+    │
+    └── src/
+        ├── main.jsx
+        ├── App.jsx
+        │
+        ├── api/
+        │   └── client.js         # Axios instance + auth interceptor
+        │
+        ├── context/
+        │   └── AuthContext.jsx   # Auth state/provider
+        │
+        ├── components/
+        │   ├── AppShell.jsx
+        │   ├── ProtectedRoute.jsx
+        │   ├── AdminRoute.jsx
+        │   ├── ECGChart.jsx
+        │   ├── SaliencyHeatmap.jsx
+        │   ├── RiskBadge.jsx
+        │   ├── StatCard.jsx
+        │   └── ProcessingOverlay.jsx
+        │
+        ├── pages/
+        │   ├── Login.jsx
+        │   ├── Dashboard.jsx
+        │   ├── Patients.jsx
+        │   ├── PatientDetail.jsx
+        │   └── Admin.jsx
+        │
+        ├── utils/
+        │   └── time.js
+        │
+        └── styles/
+            └── index.css
 ```
+
+`backend/weights/`, `backend/database/`, `backend/uploads/`, and `backend/reports_out/` exist locally but their contents are gitignored (except `.gitkeep` placeholders) — they'll appear empty or missing on GitHub until someone adds real files.
 
 ## Getting Started
 
@@ -55,10 +118,7 @@ pip install -r requirements.txt
 
 Add your trained checkpoint to `backend/weights/best_model.pth` (see `backend/README.md` for the required checkpoint format — `model_state`, `lead_mean`, `lead_std`, optional `thresholds`).
 
-```bash
-cp .env.example .env
-# edit .env: set SECRET_KEY to a long random string
-```
+Create a `backend/.env` file (see the Configuration section below for the required variables) and set `SECRET_KEY` to a long random string.
 
 Create the database and demo accounts:
 
@@ -98,7 +158,7 @@ App runs at http://localhost:5173 and talks to the backend at `http://localhost:
 
 ## Configuration
 
-Key variables in `backend/.env` (copy from `.env.example`):
+Create a `backend/.env` file with these variables:
 
 | Variable | Description |
 |---|---|
